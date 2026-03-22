@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libpq-dev curl && \
     rm -rf /var/lib/apt/lists/*
 
-COPY apps/api/requirements-production.txt ./requirements-production.txt
+# requirements-production.txt does `-r requirements.txt` — both must exist before pip
+COPY apps/api/requirements.txt apps/api/requirements-production.txt ./
 RUN pip install --no-cache-dir -r requirements-production.txt
 
 COPY apps/api/ ./
