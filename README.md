@@ -4,6 +4,10 @@
 
 A complete, production-grade investigation automation platform for fraud and risk teams. Entity-centric investigations with AI-generated narratives, real-time detection, and mitigation artifact deployment.
 
+## Deploy to production
+
+See **[DEPLOY.md](./DEPLOY.md)** for Vercel (frontend) + Railway (API, Postgres, Redis, worker).
+
 ## Quick Start
 
 ```bash

@@ -1,16 +1,4 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "https://api.riskpulse.io"
-  },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://api.riskpulse.io/api/:path*"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

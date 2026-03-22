@@ -1,0 +1,6 @@
+# Railway / Nixpacks: use production deps (Postgres async drivers, etc.)
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.12"
+
+[phases.install]
+cmds = ["pip install --no-cache-dir -r requirements-production.txt"]
