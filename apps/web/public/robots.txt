@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /alerts
+Disallow: /cases
+Disallow: /entities
+Disallow: /rules
+Disallow: /engineering
+Disallow: /deployments
+Disallow: /settings
+Disallow: /onboarding
+Disallow: /api/
+
+Sitemap: https://riskpulse.io/sitemap.xml

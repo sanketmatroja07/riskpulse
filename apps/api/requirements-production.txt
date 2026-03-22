@@ -1,0 +1,18 @@
+# Production-only dependencies (in addition to requirements.txt)
+-r requirements.txt
+
+# PostgreSQL
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+
+# Migrations
+alembic>=1.13.0
+
+# Error tracking
+sentry-sdk[fastapi]>=1.40.0
+
+# Rate limiting
+slowapi>=0.1.9
+
+# Billing
+stripe>=8.0.0
