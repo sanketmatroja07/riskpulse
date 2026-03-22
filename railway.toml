@@ -1,8 +1,9 @@
-# Railway uses Railpack by default; pin Dockerfile for a reliable Python API build.
-# Service root directory in UI must be: apps/api
+# Railway: build from repo root so Dockerfile COPY paths match.
+# In the Railway service UI, leave "Root Directory" **empty** (or "/").
+# See DEPLOY.md
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "apps/api/Dockerfile"
 
 [deploy]
 startCommand = "sh start.sh"

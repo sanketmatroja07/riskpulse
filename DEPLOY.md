@@ -14,9 +14,8 @@ This guide deploys the **Next.js** frontend to [Vercel](https://vercel.com) and 
 ### 1. Create a project
 
 1. Open [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo** → select **riskpulse**.
-2. Railway will ask where to deploy. Click **Add variables** later; first set the **root directory** for the API service:
-   - Open the service → **Settings** → **Root Directory** → `apps/api`
-   - **Save**
+2. **Important — root directory:** open the API service → **Settings** → **Root Directory** and leave it **empty** (repo root `/`). This repo ships **`railway.toml`** at the top level and **`apps/api/Dockerfile`** with `COPY apps/api/...` paths. If you set Root Directory to `apps/api`, Railpack runs from the wrong context and fails (e.g. “start.sh not found” / “could not determine how to build”).
+3. Confirm **Build** uses **Dockerfile**: Settings → Build → Builder should be **Dockerfile** (driven by `railway.toml`).
 
 ### 2. Add PostgreSQL
 
@@ -48,7 +47,7 @@ On the **API** service (**apps/api**), set:
 
 ### 5. Deploy the API
 
-- **Build**: `railway.toml` sets **`builder = DOCKERFILE`** so Railway uses `apps/api/Dockerfile` (Railpack’s auto-detect often fails on monorepos; Dockerfile is explicit).
+- **Build**: Root **`railway.toml`** sets **`builder = DOCKERFILE`** and **`dockerfilePath = apps/api/Dockerfile`**. The Dockerfile expects the build context to be the **repo root** (see `COPY apps/api/...`).
 - **Start**: `apps/api/start.sh` runs the seed (idempotent) then `uvicorn` on `$PORT`.
 - After deploy, open **`https://<your-railway-domain>/docs`** — you should see Swagger.
 
@@ -57,12 +56,13 @@ Copy your API’s public HTTPS URL (e.g. `https://riskpulse-api-production.up.ra
 ### 6. Worker (optional, background jobs)
 
 1. **New** → **Empty service** → **Connect repo** → same `riskpulse` repo.
-2. **Settings** → **Root Directory** → `apps/api`
-3. **Deploy** → **Custom start command**:
+2. **Settings** → **Root Directory** → **empty** (same as API).
+3. **Build** → same as API: **Dockerfile** path `apps/api/Dockerfile`, Root Directory **empty**.
+4. **Deploy** → **Custom start command** (overrides the API’s `start.sh`):
    ```bash
    python workers/worker_main.py
    ```
-4. Copy the **same** env vars as the API (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `MODE`, etc.) or use **Shared Variables** in Railway.
+5. Copy the **same** env vars as the API (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `MODE`, etc.) or use **Shared Variables** in Railway.
 
 ---
 
@@ -105,6 +105,7 @@ Same as local:
 
 | Issue | What to check |
 |-------|----------------|
+| “Railpack could not determine how to build” / “start.sh not found” | Service **Root Directory** must be **empty** (not `apps/api`). Use repo-root `railway.toml` + `apps/api/Dockerfile`. |
 | API 502 / crash | Railway **Deploy Logs**; ensure `DATABASE_URL` is set and Postgres is running |
 | CORS errors in browser | `CORS_ORIGINS` must include your Vercel `https://...` URL exactly |
 | Login / API fails from Vercel | `NEXT_PUBLIC_API_URL` must match Railway URL; redeploy Vercel after changing it |

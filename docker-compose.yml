@@ -30,8 +30,8 @@ services:
 
   api:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -56,8 +56,8 @@ services:
 
   worker:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     environment:
       DATABASE_URL: postgresql+asyncpg://riskpulse:riskpulse_dev@postgres:5432/riskpulse
       DATABASE_URL_SYNC: postgresql://riskpulse:riskpulse_dev@postgres:5432/riskpulse
