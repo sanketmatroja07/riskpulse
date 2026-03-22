@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
 import { api } from '@/lib/api';
 import { entityTypeIcon, riskColor, formatRelativeTime, cn } from '@/lib/utils';
 
-export default function EntitiesPage() {
-  const router = useRouter();
+function EntitiesContent() {
   const searchParams = useSearchParams();
   const entityIdParam = searchParams.get('id');
 
@@ -266,5 +265,29 @@ export default function EntitiesPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+export default function EntitiesPage() {
+  return (
+    <Suspense
+      fallback={
+        <AppShell>
+          <div className="max-w-7xl mx-auto">
+            <div className="skeleton h-10 w-64 rounded-lg mb-6" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="skeleton h-14 rounded-lg" />
+                ))}
+              </div>
+              <div className="lg:col-span-2 skeleton h-96 rounded-xl" />
+            </div>
+          </div>
+        </AppShell>
+      }
+    >
+      <EntitiesContent />
+    </Suspense>
   );
 }
