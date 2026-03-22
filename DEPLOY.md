@@ -48,8 +48,8 @@ On the **API** service (**apps/api**), set:
 
 ### 5. Deploy the API
 
-- **Build**: Uses `apps/api/nixpacks.toml` → installs `requirements-production.txt`.
-- **Start**: `apps/api/start.sh` runs the seed (idempotent) then `uvicorn`.
+- **Build**: `railway.toml` sets **`builder = DOCKERFILE`** so Railway uses `apps/api/Dockerfile` (Railpack’s auto-detect often fails on monorepos; Dockerfile is explicit).
+- **Start**: `apps/api/start.sh` runs the seed (idempotent) then `uvicorn` on `$PORT`.
 - After deploy, open **`https://<your-railway-domain>/docs`** — you should see Swagger.
 
 Copy your API’s public HTTPS URL (e.g. `https://riskpulse-api-production.up.railway.app`).
