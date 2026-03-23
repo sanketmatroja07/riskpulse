@@ -8,7 +8,7 @@ import json
 import csv
 import io
 import random
-from models.database import get_db, User, Event, Entity, Transaction, Organization
+from models.database import get_db, User, Event, Entity, Transaction, Organization, Alert
 from models.schemas import EventResponse, IngestEventRequest
 from services.auth_service import get_current_user, require_role, log_audit, authenticate_api_key
 from services.detection_service import process_event
@@ -56,7 +56,7 @@ async def list_events(
 async def ingest_event(
     req: IngestEventRequest,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_role("admin", "analyst", "engineer"))
+    user: User = Depends(get_current_user)
 ):
     entity_id = None
     if req.entity_type and req.entity_external_id:
@@ -91,9 +91,31 @@ async def ingest_event(
     await db.refresh(event)
 
     alerts_created = await process_event(db, event)
+    await db.refresh(event)
+    alerts_result = await db.execute(
+        select(Alert).where(Alert.event_id == event.id).order_by(Alert.created_at.desc())
+    )
+    alerts = alerts_result.scalars().all()
     await log_audit(db, user, "ingest_event", "event", event.id, {"alerts_created": alerts_created})
 
-    return {"event_id": str(event.id), "alerts_created": alerts_created}
+    return {
+        "event_id": str(event.id),
+        "alerts_created": alerts_created,
+        "risk_score": event.risk_score,
+        "processed": event.processed,
+        "event": EventResponse.model_validate(event).model_dump(mode="json"),
+        "alerts": [
+            {
+                "id": str(alert.id),
+                "alert_type": alert.alert_type,
+                "severity": alert.severity,
+                "title": alert.title,
+                "model_score": alert.model_score,
+                "status": alert.status,
+            }
+            for alert in alerts
+        ],
+    }
 
 
 @router.post("/ingest/webhook", response_model=dict)

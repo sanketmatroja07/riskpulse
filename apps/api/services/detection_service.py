@@ -63,10 +63,11 @@ async def process_event(db: AsyncSession, event: Event) -> int:
         db.add(alert)
         alerts_created += 1
 
-    if alerts_created > 0:
-        event.processed = True
-        event.risk_score = score
-        await db.commit()
+    # Persist the computed score for every event so users can inspect risk
+    # even when the event does not create an alert.
+    event.processed = True
+    event.risk_score = score
+    await db.commit()
 
     return alerts_created
 
