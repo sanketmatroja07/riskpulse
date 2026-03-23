@@ -555,6 +555,7 @@ def seed():
     ]
 
     case_objects = []
+    case_alert_links = []
     for i, (title, priority, status, alert_idxs, entity_idxs, decision) in enumerate(case_configs):
         c_alert_ids = [alert_objects[idx].id for idx in alert_idxs if idx < len(alert_objects)]
         c_entity_ids = [user_entities[idx].id for idx in entity_idxs if idx < len(user_entities)]
@@ -587,11 +588,17 @@ def seed():
         )
         db.add(case)
         case_objects.append(case)
+        case_alert_links.append((case.id, alert_idxs))
 
-        # Link alerts to cases
+    # Flush case rows first so alert foreign-key updates always reference
+    # existing cases in Postgres, including stricter hosted environments.
+    db.flush()
+
+    # Link alerts to cases after cases exist in the database.
+    for case_id, alert_idxs in case_alert_links:
         for aidx in alert_idxs:
             if aidx < len(alert_objects):
-                alert_objects[aidx].case_id = case.id
+                alert_objects[aidx].case_id = case_id
 
     db.flush()
 
