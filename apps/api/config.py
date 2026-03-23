@@ -1,4 +1,5 @@
 import os
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 class Settings:
     def __init__(self):
@@ -15,7 +16,17 @@ class Settings:
             self.DATABASE_URL_SYNC = db_url
             # Async version
             if "postgresql://" in db_url:
-                self.DATABASE_URL = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+                async_db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+                # psycopg2 accepts sslmode=require, but asyncpg expects ssl=require.
+                if "sslmode=" in async_db_url:
+                    parsed = urlparse(async_db_url)
+                    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+                    if "sslmode" in query and "ssl" not in query:
+                        query["ssl"] = query.pop("sslmode")
+                    async_db_url = urlunparse(parsed._replace(query=urlencode(query)))
+
+                self.DATABASE_URL = async_db_url
             else:
                 self.DATABASE_URL = db_url
         elif self.MODE == "docker":
