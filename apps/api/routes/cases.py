@@ -27,6 +27,16 @@ def _org_filter(query, model, user):
     return query
 
 
+async def _next_case_number(db: AsyncSession) -> str:
+    """Generate a globally unique case number.
+
+    Case numbers are globally unique in the database, so they cannot be based
+    only on the current org's case count.
+    """
+    count = (await db.execute(select(func.count(Case.id)))).scalar() or 0
+    return f"CASE-{count + 1:05d}"
+
+
 @router.get("", response_model=dict)
 async def list_cases(
     status: Optional[str] = None,
@@ -67,11 +77,7 @@ async def create_case(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_role("admin", "analyst"))
 ):
-    count_q = select(func.count(Case.id))
-    if user.org_id:
-        count_q = count_q.where(Case.org_id == user.org_id)
-    count = (await db.execute(count_q)).scalar() or 0
-    case_number = f"CASE-{count + 1:05d}"
+    case_number = await _next_case_number(db)
 
     case = Case(
         org_id=user.org_id,
